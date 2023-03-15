@@ -761,7 +761,7 @@
     "ansi-styles" "^4.1.0"
     "supports-color" "^7.1.0"
 
-"class-validator@>=0.12.0":
+"class-validator@^0.14.0", "class-validator@>=0.12.0":
   "integrity" "sha512-ct3ltplN8I9fOwUd8GrP8UQixwff129BkEtuWDKL5W45cQuLd19xqmTLu5ge78YDm/fdje6FMt0hGOhl0lii3A=="
   "resolved" "https://registry.npmjs.org/class-validator/-/class-validator-0.14.0.tgz"
   "version" "0.14.0"
@@ -1673,7 +1673,7 @@
   dependencies:
     "resolve" "^1.20.0"
 
-"reflect-metadata@0.1.13":
+"reflect-metadata@^0.1.13", "reflect-metadata@0.1.13":
   "integrity" "sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg=="
   "resolved" "https://registry.npmjs.org/reflect-metadata/-/reflect-metadata-0.1.13.tgz"
   "version" "0.1.13"
