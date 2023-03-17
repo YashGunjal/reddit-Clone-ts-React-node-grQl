@@ -1,6 +1,6 @@
 import { User } from "../entities/user";
 import { MyContext } from "src/types";
-import { Resolver, Mutation, Arg, InputType, Field, Ctx, ObjectType } from "type-graphql";
+import {Query,  Resolver, Mutation, Arg, InputType, Field, Ctx, ObjectType } from "type-graphql";
 import  argon2 from "argon2";
 
 @InputType()   // input type are to define argments of the resolvers
@@ -38,10 +38,22 @@ class UserResponse{
 @Resolver()
 export class UserResolver{
 
+    @Query(() => User, { nullable: true})
+    async me(
+        @Ctx() {em,  req} : MyContext
+    ) {
+        if  (!req.session.userId){
+            console.log(" couldn't find user")
+            return null
+        }
+        const user =await  em.findOne(User, { id: req.session.userId})
+        return user
+    }
+
     @Mutation(() => UserResponse)
     async  register(
         @Arg("options") options: UsernamePasswordInput,
-        @Ctx() { em } : MyContext
+        @Ctx() { em, req } : MyContext
     ) {
         //validations
         if (options.username.length <=2){
@@ -85,6 +97,8 @@ export class UserResolver{
             }
 
         }
+        // login in user after register
+        req.session!.userId = user.id;
 
         return {user};
     }
@@ -93,7 +107,7 @@ export class UserResolver{
     @Mutation(() => UserResponse)
     async  login(
         @Arg("options") options: UsernamePasswordInput,
-        @Ctx() { em } : MyContext
+        @Ctx() { em, req} : MyContext
     ): Promise<UserResponse> {
         const user = await  em.findOne(User, {
             username: options.username.toLowerCase(),  
@@ -117,6 +131,8 @@ export class UserResolver{
                 }]
             };
         }
+
+        req.session!.userId = user.id;
         
         return {user};
     }
