@@ -3,6 +3,7 @@ import { MikroORM } from "@mikro-orm/core";
 import { __prod__ } from "./constants";
 // import { Post } from "./entities/post";
 import microConfig from "./mikro-orm.config";
+import cors from 'cors';
 
 import Express from "express";
 import { ApolloServer } from "apollo-server-express";
@@ -39,6 +40,14 @@ const main = async () => {
     // disableTTL: true,
   });
 
+  app.set("trust proxy", 1);
+  app.use(
+    cors({
+      origin:   process.env.CORS_ORIGIN || "http://localhost:3000",
+      credentials: true,
+    })
+  );
+
   
 
   app.use(
@@ -69,7 +78,7 @@ const main = async () => {
 
   apolloServer.applyMiddleware({
     app,
-    // ,cors:false
+    cors:false
   });
 
   app.listen(4000, () => {
