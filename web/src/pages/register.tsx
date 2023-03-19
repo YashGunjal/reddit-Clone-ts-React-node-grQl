@@ -7,39 +7,41 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
+import { useRouter } from "next/router";
 import React from "react";
-import { useMutation } from "urql";
 import { InputField } from "../components/InputField";
 import { Wrapper } from "../components/Wrapper";
+import { useRegisterMutation } from "../generated/graphql";
+import { toErrorMap } from "../utils/toErrorMap";
 
 interface registerProps {}
 
-const REGISTER_MUT = `mutation Register($options: UsernamePasswordInput!) {
-    register(options: $options) {
-      errors {
-       field
-       message
-     }
-     user {
-       username
-       id
-     }
-    }
-  }`;
 
 export const Register: React.FC<registerProps> = ({}) => {
-  const [, register] = useMutation(REGISTER_MUT);
+  const [, register] = useRegisterMutation();
+  const router= useRouter();
 
   return (
     <Wrapper variant="small">
       <Formik
         initialValues={{ username: "", password: "" }}
-        onSubmit={ async (values) => {
-          console.log(values);
+        onSubmit={ async (values, { setErrors }) => {
+          // console.log(values);
            const response = await register({
             // options: { username: values.username, password: values.password },
             options:values
           });
+          console.log(" actial", response)
+          if (response?.data?.register?.errors){
+            console.log(" set error")
+            console.log( "error list", response.data.register.errors)
+            console.log(toErrorMap(response.data.register.errors));
+             setErrors(toErrorMap(response.data.register.errors))
+          }
+          else if ( response.data?.register?.user)
+          {
+            router.push('/')
+          }
           console.log(response)
           return response
         }}
@@ -49,13 +51,13 @@ export const Register: React.FC<registerProps> = ({}) => {
             <InputField
               name="username"
               placeholder="User Name"
-              label=" User Name"
+              label="User Name"
             />
             <Box mt={4}>
               <InputField
                 name="password"
                 placeholder="Password"
-                label=" Password"
+                label="Password"
                 type="password"
               />
             </Box>

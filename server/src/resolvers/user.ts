@@ -2,6 +2,7 @@ import { User } from "../entities/user";
 import { MyContext } from "src/types";
 import {Query,  Resolver, Mutation, Arg, InputType, Field, Ctx, ObjectType } from "type-graphql";
 import  argon2 from "argon2";
+import { EntityManager } from "@mikro-orm/postgresql";
 
 @InputType()   // input type are to define argments of the resolvers
 class UsernamePasswordInput {
@@ -74,32 +75,38 @@ export class UserResolver{
         console.log( " after validation")
         // register 
         const hashedPassword =  await argon2.hash(options.password)
-        const user = em.create(User, {
-            username: options.username.toLowerCase(),
-            createdAt: "",
-            updatedAt: "",
-            password: hashedPassword,
-        })
-
+       
+        let user;
         try{
-            await em.persistAndFlush(user);
+
+            const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert({
+
+                username: options.username.toLowerCase(),
+                created_at: new Date(),
+                updated_at: new Date(),
+                password: hashedPassword,
+            }).returning('*')
+
+            user =result[0]
+            
         }catch(err){
             console.log(err)
             if (err.code === '23505'){
                 return { 
                     errors: [
                         {
-                            field: " username",
-                            message: "username already taken"
+                            field: "username",
+                            message: "Username already taken!!"
                         }
                     ]
                 }
+
             }
 
         }
         // login in user after register
         req.session!.userId = user.id;
-
+        console.log( "returned user", user)
         return {user};
     }
 
@@ -112,7 +119,7 @@ export class UserResolver{
         const user = await  em.findOne(User, {
             username: options.username.toLowerCase(),  
         })
-
+        console.log(" login options",options)
         if (!user) {
             return{
                 errors:[{
